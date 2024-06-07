@@ -1,0 +1,11 @@
+{
+    "sleep":[],
+    "water consumption":[
+        {
+            "consumption":300,
+            "date":"2024-05-20",
+            "drink type":"water",
+            "time":"00:52:43"
+        }
+    ]
+}
