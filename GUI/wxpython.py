@@ -4,10 +4,11 @@
 import wx
 import time
 import threading
-import datetime
+from datetime import datetime
 import mysql
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FC
+from matplotlib.figure import Figure
 
 
 connection = mysql.connect_to_mysql('liuguangsen')
@@ -146,12 +147,26 @@ class MainFrame(wx.Frame):
         btn_exit.Bind(wx.EVT_BUTTON, self.on_exit)
         btn_exit.SetBackgroundColour(wx.Colour(255, 255, 255))
 
+        fig = mysql.drink_data_histogram(connection)
+        self.canvas = FC(bg_panel, -1, fig)
+        self.canvas.SetMinSize((500,500))
+        self.canvas.Move(250,200)
 
-        self.figure = plt.figure()
-        self.canvas = FC(bg_panel, -1, self.figure)
-        mysql.drink_data_histogram(connection)
-        self.canvas.SetSize(500,500)
-        self.canvas.Move(200,200)
+        fig2 = mysql.exercise_data_histogram(connection)
+        self.canvas2 = FC(bg_panel, -1, fig2)
+        self.canvas2.SetMinSize((500, 500))
+        self.canvas2.Move(800, 200)
+
+        fig3 = mysql.exercise_data_histogram(connection)
+        self.canvas3 = FC(bg_panel, -1, fig3)
+        self.canvas3.SetMinSize((500, 500))
+        self.canvas3.Move(250, 600)
+
+        fig4 = mysql.exercise_data_histogram(connection)
+        self.canvas4 = FC(bg_panel, -1, fig4)
+        self.canvas4.SetMinSize((500, 500))
+        self.canvas4.Move(850, 600)
+
 
 
 
