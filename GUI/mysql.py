@@ -160,6 +160,17 @@ def fetch_drink_data_latest20(connection):
         data_latest20 = cursor.fetchall()
     return data_latest20
 
+def print_drink_data_latest20(connection):
+    data_latest20=fetch_drink_data_latest20(connection)
+    message=""
+    for i in range(len(data_latest20)):
+        row=data_latest20[i].copy()
+        message=message + f"{row['id']}. {str(row['date_time'])}, {row['drink_type']}, {row['intake_ml']}"
+        if i != len(data_latest20)-1:
+            message += "\n"
+    return message
+
+
 def fetch_drink_data_week(connection):
     # 读取数据
     with connection.cursor() as cursor:
@@ -203,6 +214,16 @@ def fetch_exercise_data_latest20(connection):
         data_latest20 = cursor.fetchall()
     return data_latest20
 
+def print_exercise_data_latest20(connection):
+    data_latest20=fetch_exercise_data_latest20(connection)
+    message=""
+    for i in range(len(data_latest20)):
+        row=data_latest20[i].copy()
+        message=message + f"{row['id']}. {str(row['date_time'])}, {row['exercise_type']}, {str(row['duration'])}"
+        if i!=len(data_latest20)-1:
+            message+="\n"
+    return message
+
 def fetch_exercise_data_week(connection):
     # 读取数据
     with connection.cursor() as cursor:
@@ -239,7 +260,7 @@ def fetch_sleep_data_latest20(connection):
         query = """
         SELECT * FROM sleep_data
         ORDER BY id DESC
-        LIMIT 20
+        LIMIT 10
         """
         cursor.execute(query)
         # 将数据存储在变量 data_latest20 中
@@ -484,7 +505,7 @@ def exercise_data_pie_chart(connection):
     plt.show()
 
 
-if __name__=='__main__' and True:
+if __name__=='__main__' and False:
 
     connection = connect_to_mysql()
     create_database(connection)
