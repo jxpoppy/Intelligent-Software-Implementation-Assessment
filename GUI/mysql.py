@@ -9,16 +9,16 @@ import numpy as np
 database form
 
 drink table
-date        time        drink_type  intake(ml)
-YYYY-MM-DD  HH:MM:SS    varchar     int
+date_time               drink_type  intake(ml)
+YYYY-MM-DD HH:MM:SS     varchar     int
 
 exercise table
-date        time        exercise_type   duration
-YYYY-MM-DD  HH:MM:SS    varchar         varchar(HH:MM:SS)
+date_time               exercise_type   duration
+YYYY-MM-DD HH:MM:SS     varchar         varchar(HH:MM:SS)
 
 sleep table
-sleep_time              wake_time               duration
-YYYY-MM-DD HH:MM:SS     YYYY-MM-DD HH:MM:SS     varchar
+date_time               duration
+YYYY-MM-DD HH:MM:SS     varchar(HH:MM:SS)
 
 """
 
@@ -76,8 +76,7 @@ def create_table(connection):
         create_table_query = """
         CREATE TABLE IF NOT EXISTS sleep_data (
             id INT AUTO_INCREMENT PRIMARY KEY,
-            sleep_time DATETIME,
-            wake_time DATETIME,
+            date_time DATETIME,
             duration VARCHAR(25)
         )
         """
@@ -121,20 +120,21 @@ def insert_exercise_data(connection, exercise_type, duration):
     connection.commit()
     print("Data inserted successfully.")
 
-def insert_sleep_data(connection, sleep_time, wake_time): #sleep_time和wake_time是格式为YYYY-mm-dd HH:MM:SS的字符串
+def insert_sleep_data(connection, duration): #sleep_time和wake_time是格式为YYYY-mm-dd HH:MM:SS的字符串
                                                             #wake_time格式为day HH:MM:SS
+
+    # 获取当前的日期和时间
+    now = datetime.now()
+    # 获取当前的日期（年月日时分秒）
+    date_time = now.strftime("%Y-%m-%d %H:%M:%S")
+
     # 向表格 sleep_data 中插入数据
     with connection.cursor() as cursor:
         insert_query = """
-        INSERT INTO sleep_data (sleep_time, wake_time, duration)
-        VALUES (%s, %s, %s)
+        INSERT INTO sleep_data (date_time, duration)
+        VALUES (%s, %s)
         """
-        #计算睡眠时长
-        time1 = datetime.strptime(sleep_time, '%Y-%m-%d %H:%M:%S')
-        time2 = datetime.strptime(wake_time, '%Y-%m-%d %H:%M:%S')
-        duration = str(time2 - time1)
-
-        data = (sleep_time, wake_time, duration)
+        data = (date_time, duration)
         cursor.execute(insert_query, data)
     connection.commit()
     print("Data inserted successfully.")
@@ -176,7 +176,8 @@ def fetch_drink_data_week(connection):
     with connection.cursor() as cursor:
         # 获取当前时间和一星期前的时间
         now = datetime.now()
-        one_week_ago = now - timedelta(days=7)
+        today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        one_week_ago = today_start - timedelta(days=7)
 
         # 转换为字符串格式，适应MySQL的DATETIME格式
         one_week_ago_str = one_week_ago.strftime('%Y-%m-%d %H:%M:%S')
@@ -229,7 +230,8 @@ def fetch_exercise_data_week(connection):
     with connection.cursor() as cursor:
         # 获取当前时间和一星期前的时间
         now = datetime.now()
-        one_week_ago = now - timedelta(days=7)
+        today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        one_week_ago = today_start - timedelta(days=7)
 
         # 转换为字符串格式，适应MySQL的DATETIME格式
         one_week_ago_str = one_week_ago.strftime('%Y-%m-%d %H:%M:%S')
@@ -282,19 +284,20 @@ def fetch_sleep_data_latest20(connection):
         query = """
         SELECT * FROM sleep_data
         ORDER BY id DESC
-        LIMIT 10
+        LIMIT 20
         """
         cursor.execute(query)
         # 将数据存储在变量 data_latest20 中
         data_latest20 = cursor.fetchall()
     return data_latest20
 
-def fetch_sleep_data_week(connection):
+def fetch_sleep_data_month(connection):
     # 读取数据
     with connection.cursor() as cursor:
         # 获取当前时间和一个月(按30天计)前的时间
         now = datetime.now()
-        one_month_ago = now - timedelta(days=30)
+        today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        one_month_ago = today_start - timedelta(days=30)
 
         # 转换为字符串格式，适应MySQL的DATETIME格式
         one_month_ago_str = one_month_ago.strftime('%Y-%m-%d %H:%M:%S')
@@ -345,12 +348,13 @@ def calculate_exercise_calorie_today(connection):
     #存储卡路里
     calorie=0
     for row in data_today:
-        duration = row['duration']
-        # 获取总秒数
-        total_seconds = duration.total_seconds()
-        # 将秒数转换为分钟数
-        duration_min = total_seconds / 60
-        print(row['exercise_type'],duration_min)
+
+        # 分割字符串并转换为整数
+        hours, minutes, seconds = map(int, row['duration'].split(':'))
+        # 将小时和分钟转换为总的分钟数
+        duration_min = hours * 60 + minutes + seconds // 60  # 将秒数部分也算作分钟
+
+        #print(row['exercise_type'],duration_min)
         if row['exercise_type']=='walk':
             # 累计卡路里数量
             calorie += 5 * duration_min
@@ -379,6 +383,11 @@ def drink_data_histogram(connection):
     # 获取过去一个星期饮品摄入量的数据
     data_week = fetch_drink_data_week(connection)
 
+    # 如果没有数据，则返回0
+    if len(data_week)==0:
+        print("No data")
+        return
+
     # 遍历数据，统计每天每种饮品的摄入量总和
     for row in data_week:
         date = row['date_time'].date()  # 获取日期（年月日）
@@ -395,7 +404,7 @@ def drink_data_histogram(connection):
     water_intake = []
     coke_intake = []
     beer_intake = []
-    juice_intake = []
+    milk_intake = []
 
     current_date = start_date
     while current_date <= end_date:
@@ -403,7 +412,7 @@ def drink_data_histogram(connection):
         water_intake.append(daily_intake[current_date]['water'])
         coke_intake.append(daily_intake[current_date]['coke'])
         beer_intake.append(daily_intake[current_date]['beer'])
-        juice_intake.append(daily_intake[current_date]['juice'])
+        milk_intake.append(daily_intake[current_date]['milk'])
         current_date += timedelta(days=1)
 
     # 计算柱状图的位置
@@ -415,7 +424,7 @@ def drink_data_histogram(connection):
     ax.bar([x - 1.5 * bar_width for x in bar_positions], water_intake, label='Water', color='blue', width=bar_width)
     ax.bar([x - 0.5 * bar_width for x in bar_positions], coke_intake, label='Coke', color='red', width=bar_width)
     ax.bar([x + 0.5 * bar_width for x in bar_positions], beer_intake, label='Beer', color='green', width=bar_width)
-    ax.bar([x + 1.5 * bar_width for x in bar_positions], juice_intake, label='Juice', color='orange', width=bar_width)
+    ax.bar([x + 1.5 * bar_width for x in bar_positions], milk_intake, label='Milk', color='orange', width=bar_width)
 
     # 设置图形属性
     ax.set_xlabel('Date')
@@ -435,12 +444,15 @@ def exercise_data_histogram(connection):
     # 获取过去一个星期运动数据
     data_week = fetch_exercise_data_week(connection)
 
+    # 如果没有数据，则返回0
+    if len(data_week) == 0:
+        print("No data")
+        return
+
     # 遍历数据，统计每天每种运动的时长总和
     for row in data_week:
         date = row['date_time'].date()  # 获取日期（年月日）
         exercise_type = row['exercise_type']
-
-
         # 将时间字符串转换为datetime对象
         time_obj = datetime.strptime(row['duration'], "%H:%M:%S")
         # 计算总分钟数，忽略秒数
@@ -505,6 +517,11 @@ def drink_data_pie_chart(connection):
     # 获取过去一个星期饮品摄入量的数据
     data_week = fetch_drink_data_week(connection)
 
+    # 如果没有数据，则返回0
+    if len(data_week) == 0:
+        print("No data")
+        return
+
     # 遍历数据，统计每种饮品的摄入量总和
     for row in data_week:
         drink_type = row['drink_type']
@@ -526,7 +543,7 @@ def drink_data_pie_chart(connection):
 
     # 绘制饼图
     ax.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=140)
-    ax.set_title('Drink Intake Percentage', pad=20)  # 调整标题的距离
+    ax.set_title('Drink Intake Percentage per week', pad=20)  # 调整标题的距离
     ax.axis('equal')  # 保持饼图为圆形
 
     # 调整图的子图布局，将饼图下移一些距离
@@ -540,14 +557,21 @@ def exercise_data_pie_chart(connection):
     # 获取过去一个星期运动持续时间的数据
     data_week = fetch_exercise_data_week(connection)
 
+    # 如果没有数据，则返回0
+    if len(data_week) == 0:
+        print("No data")
+        return
+
     # 遍历数据，统计每种运动的持续时间总和
     for row in data_week:
         exercise_type = row['exercise_type']
-        # 获取总秒数
-        total_seconds = row['duration'].total_seconds()
-        # 转换为总分钟数并忽略秒数
-        total_minutes = total_seconds // 60
-        duration_min = total_minutes
+
+        # 分割字符串并转换为整数
+        hours, minutes, seconds = map(int, row['duration'].split(':'))
+        # 将小时和分钟转换为总的分钟数
+        total_minutes = hours * 60 + minutes + seconds // 60  # 将秒数部分也算作分钟
+
+        duration_min = int(total_minutes)
         total_duration[exercise_type] += duration_min
 
     # 计算总摄入量
@@ -565,13 +589,61 @@ def exercise_data_pie_chart(connection):
 
     # 绘制饼图
     ax.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=140)
-    ax.set_title('Exercise Duration Percentage', pad=20)  # 调整标题的距离
+    ax.set_title('Exercise Duration Percentage per week', pad=20)  # 调整标题的距离
     ax.axis('equal')  # 保持饼图为圆形
 
     # 调整图的子图布局，将饼图下移一些距离
     fig.subplots_adjust(bottom=0.1)
 
     return fig
+
+def sleep_data_line_chart(connection):
+    # 创建一个字典，用于存储每种运动的持续时间总和
+    total_duration = defaultdict(int)
+    # 获取过去一个星期运动持续时间的数据
+    data_week = fetch_sleep_data_month(connection)
+    #data_week = fetch_exercise_data_week(connection)
+
+    # 如果没有数据，则返回0
+    if len(data_week) == 0:
+        print("No data")
+        return
+
+    # 将数据转换为日期和时长的列表
+    dates = []
+    durations = []
+
+    for row in data_week:
+        date = row['date_time'].date()
+        duration_parts = row['duration'].split(':')
+        duration_hours = float(duration_parts[0]) + float(duration_parts[1]) / 60
+        dates.append(date)
+        durations.append(duration_hours)
+
+    # 按日期进行分组并计算每天的睡眠总时长
+    daily_sleep_duration = {}
+    for date, duration in zip(dates, durations):
+        if date in daily_sleep_duration:
+            daily_sleep_duration[date] += duration
+        else:
+            daily_sleep_duration[date] = duration
+
+    # 将字典按日期排序
+    sorted_dates = sorted(daily_sleep_duration.keys())
+    sorted_durations = [round(daily_sleep_duration[date], 1) for date in sorted_dates]
+
+    # 创建折线图
+    fig, ax = plt.subplots(figsize=(11, 4),dpi = 100)
+    ax.plot(sorted_dates, sorted_durations, marker='o', linestyle='-')
+
+    # 设置图形属性
+    ax.set_title('Sleep Duration Over Time')
+    ax.set_xlabel('Date')
+    ax.set_ylabel('Sleep Duration (Hours)')
+    ax.grid(True)
+
+    return fig
+
 
 
 if __name__=='__main__' and True:
@@ -593,4 +665,5 @@ if __name__=='__main__' and True:
     #print(type(data))
 
     #truncate_drink_data(connection)
+    sleep_data_line_chart(connection)
     connection.close()
