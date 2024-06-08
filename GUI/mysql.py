@@ -14,7 +14,7 @@ YYYY-MM-DD  HH:MM:SS    varchar     int
 
 exercise table
 date        time        exercise_type   duration
-YYYY-MM-DD  HH:MM:SS    varchar         HH:MM:SS
+YYYY-MM-DD  HH:MM:SS    varchar         varchar(HH:MM:SS)
 
 sleep table
 sleep_time              wake_time               duration
@@ -67,7 +67,7 @@ def create_table(connection):
             id INT AUTO_INCREMENT PRIMARY KEY,
             date_time DATETIME,
             exercise_type VARCHAR(255),
-            duration TIME
+            duration VARCHAR(25)
         )
         """
         cursor.execute(create_table_query)
@@ -351,36 +351,37 @@ def drink_data_histogram(connection):
     bar_width = 0.2
     bar_positions = range(len(dates))
 
-    # 绘制柱状图
-    plt.figure(figsize=(10, 6))
-    plt.bar([x - 1.5 * bar_width for x in bar_positions], water_intake, label='Water', color='blue', width=bar_width)
-    plt.bar([x - 0.5 * bar_width for x in bar_positions], coke_intake, label='Coke', color='red', width=bar_width)
-    plt.bar([x + 0.5 * bar_width for x in bar_positions], beer_intake, label='Beer', color='green', width=bar_width)
-    plt.bar([x + 1.5 * bar_width for x in bar_positions], juice_intake, label='Juice', color='orange', width=bar_width)
+    # 创建 matplotlib 图形
+    fig, ax = plt.subplots(figsize=(4.5, 4), dpi=100)
+    ax.bar([x - 1.5 * bar_width for x in bar_positions], water_intake, label='Water', color='blue', width=bar_width)
+    ax.bar([x - 0.5 * bar_width for x in bar_positions], coke_intake, label='Coke', color='red', width=bar_width)
+    ax.bar([x + 0.5 * bar_width for x in bar_positions], beer_intake, label='Beer', color='green', width=bar_width)
+    ax.bar([x + 1.5 * bar_width for x in bar_positions], juice_intake, label='Juice', color='orange', width=bar_width)
 
     # 设置图形属性
-    plt.xlabel('Date')
-    plt.ylabel('Intake (ml)')
-    plt.title('Weekly Drink Intake')
-    plt.xticks(bar_positions, dates, rotation=45)
-    plt.legend()
-
-    # 显示图形
+    ax.set_xlabel('Date')
+    ax.set_ylabel('Intake (ml)')
+    ax.set_title('Weekly Drink Intake')
+    ax.set_xticks(bar_positions)
+    ax.set_xticklabels(dates, rotation=45)
+    ax.legend()
     plt.tight_layout()
-    plt.show()
+
+    return fig
 
 
 def exercise_data_histogram(connection):
-
-    # 创建一个字典，用于存储每天每种饮品的摄入量总和
+    # 创建一个字典，用于存储每天每种运动的时长总和
     daily_exercise = defaultdict(lambda: defaultdict(int))
-    # 获取过去一个星期饮品摄入量的数据
+    # 获取过去一个星期运动数据
     data_week = fetch_exercise_data_week(connection)
 
-    # 遍历数据，统计每天每种饮品的摄入量总和
+    # 遍历数据，统计每天每种运动的时长总和
     for row in data_week:
         date = row['date_time'].date()  # 获取日期（年月日）
         exercise_type = row['exercise_type']
+
+
         # 将时间字符串转换为datetime对象
         time_obj = datetime.strptime(row['duration'], "%H:%M:%S")
         # 计算总分钟数，忽略秒数
@@ -416,25 +417,26 @@ def exercise_data_histogram(connection):
     bar_width = 0.2
     bar_positions = range(len(dates))
 
-    # 绘制柱状图
-    plt.figure(figsize=(10, 6))
-    plt.bar([x - 2.5 * bar_width for x in bar_positions], walk_duration, label='Walk', color='blue',width=bar_width)
-    plt.bar([x - 1.5 * bar_width for x in bar_positions], run_duration, label='Run', color='red',width=bar_width)
-    plt.bar([x - 0.5 * bar_width for x in bar_positions], cycle_duration, label='Cycle', color='green',width=bar_width)
-    plt.bar([x + 0.5 * bar_width for x in bar_positions], basketball_duration, label='Basketball', color='orange',width=bar_width)
-    plt.bar([x + 1.5 * bar_width for x in bar_positions], football_duration, label='Football', color='purple',width=bar_width)
-    plt.bar([x + 2.5 * bar_width for x in bar_positions], swim_duration, label='Swim', color='cyan',width=bar_width)
+    # 创建 matplotlib 图形，尺寸为 500x500 像素
+    fig, ax = plt.subplots(figsize=(4.5, 4), dpi=100)  # 设置 dpi 为 100 以达到 500x500 像素
+
+    ax.bar([x - 2.5 * bar_width for x in bar_positions], walk_duration, label='Walk', color='blue', width=bar_width)
+    ax.bar([x - 1.5 * bar_width for x in bar_positions], run_duration, label='Run', color='red', width=bar_width)
+    ax.bar([x - 0.5 * bar_width for x in bar_positions], cycle_duration, label='Cycle', color='green', width=bar_width)
+    ax.bar([x + 0.5 * bar_width for x in bar_positions], basketball_duration, label='Basketball', color='orange', width=bar_width)
+    ax.bar([x + 1.5 * bar_width for x in bar_positions], football_duration, label='Football', color='purple', width=bar_width)
+    ax.bar([x + 2.5 * bar_width for x in bar_positions], swim_duration, label='Swim', color='cyan', width=bar_width)
 
     # 设置图形属性
-    plt.xlabel('Date')
-    plt.ylabel('Duration (min)')
-    plt.title('Weekly exercise duration')
-    plt.xticks(bar_positions, dates, rotation=45)
-    plt.legend()
-
-    # 显示图形
+    ax.set_xlabel('Date')
+    ax.set_ylabel('Duration (min)')
+    ax.set_title('Weekly Exercise Duration')
+    ax.set_xticks(bar_positions)
+    ax.set_xticklabels(dates, rotation=45)
+    ax.legend()
     plt.tight_layout()
-    plt.show()
+
+    return fig
 
 
 
@@ -460,14 +462,18 @@ def drink_data_pie_chart(connection):
     labels = [f"{drink_type} \n({total_intake[drink_type]} ml)" for drink_type in total_intake.keys()]
     sizes = percentages.values()
 
+    # 创建 matplotlib 图形，尺寸为 500x500 像素
+    fig, ax = plt.subplots(figsize=(4.5, 4), dpi=100)  # 设置 dpi 为 100 以达到 500x500 像素
+
     # 绘制饼图
-    plt.figure(figsize=(6, 6))
-    plt.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=140)
-    plt.title('Drink Intake Percentage', pad=20)  # 调整标题的距离
-    plt.axis('equal')  # 保持饼图为圆形
+    ax.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=140)
+    ax.set_title('Drink Intake Percentage', pad=20)  # 调整标题的距离
+    ax.axis('equal')  # 保持饼图为圆形
+
     # 调整图的子图布局，将饼图下移一些距离
-    plt.subplots_adjust(bottom=0.1)
-    plt.show()
+    fig.subplots_adjust(bottom=0.1)
+
+    return fig
 
 def exercise_data_pie_chart(connection):
     # 创建一个字典，用于存储每种运动的持续时间总和
@@ -495,17 +501,21 @@ def exercise_data_pie_chart(connection):
     labels = [f"{exercise_type} \n({total_duration[exercise_type]} mins)" for exercise_type in total_duration.keys()]
     sizes = percentages.values()
 
+    # 创建 matplotlib 图形，尺寸为 500x500 像素
+    fig, ax = plt.subplots(figsize=(4.5, 4), dpi=100)  # 设置 dpi 为 100 以达到 500x500 像素
+
     # 绘制饼图
-    plt.figure(figsize=(6, 6))
-    plt.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=140)
-    plt.title('Exercise duration Percentage', pad=20)  # 调整标题的距离
-    plt.axis('equal')  # 保持饼图为圆形
+    ax.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=140)
+    ax.set_title('Exercise Duration Percentage', pad=20)  # 调整标题的距离
+    ax.axis('equal')  # 保持饼图为圆形
+
     # 调整图的子图布局，将饼图下移一些距离
-    plt.subplots_adjust(bottom=0.1)
-    plt.show()
+    fig.subplots_adjust(bottom=0.1)
+
+    return fig
 
 
-if __name__=='__main__' and False:
+if __name__=='__main__' and True:
 
     connection = connect_to_mysql()
     create_database(connection)
