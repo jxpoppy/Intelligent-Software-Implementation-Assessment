@@ -6,6 +6,9 @@ import time
 import threading
 import datetime
 import mysql
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FC
+
 
 connection = mysql.connect_to_mysql('liuguangsen')
 mysql.create_database(connection)
@@ -144,6 +147,19 @@ class MainFrame(wx.Frame):
         btn_exit.SetBackgroundColour(wx.Colour(255, 255, 255))
 
 
+        self.figure = plt.figure()
+        self.canvas = FC(bg_panel, -1, self.figure)
+        mysql.drink_data_histogram(connection)
+        self.canvas.SetSize(500,500)
+        self.canvas.Move(200,200)
+
+
+
+
+
+
+
+
 
 
     def on_close(self,event):
@@ -175,13 +191,9 @@ class MainFrame(wx.Frame):
 
 
 
-
-
-
     def on_open_sub_frame_water(self, title):
         sub_frame = wx.Frame(self, title=title, size=(1300, 1000))
         sub_panel = BackgroundPanel(sub_frame, "10.png")
-
         sub_sub_panel = BackgroundPanel(sub_panel, "14.png")
         sub_sub_panel.SetSize((450, 700))  # 宽度200像素，高度100像素
         sub_sub_panel.SetPosition((850, 70))  # x坐标50像素，y坐标50像素
@@ -247,6 +259,16 @@ class MainFrame(wx.Frame):
         static_text6 = wx.StaticText(sub_panel, label='History', pos=(1000, 25))
         static_text6.SetBackgroundColour(wx.Colour(180, 230, 240))
         static_text6.SetFont(font2)
+
+        self.static_text8 = wx.StaticText(sub_panel, label="There are no records now!", pos=(900, 70))
+        self.static_text8.SetFont(font)
+
+        data_latest20 = mysql.print_drink_data_latest20(connection)
+        self.static_text8.SetLabel(data_latest20)
+
+
+
+
         static_text7 = wx.StaticText(sub_panel, label='Water reminder', pos=(360, 500))
         static_text7.SetBackgroundColour(wx.Colour(255, 255, 255))
         static_text7.SetFont(font2)
@@ -311,7 +333,6 @@ class MainFrame(wx.Frame):
         input_text = self.input_box.GetValue()
         current_text = self.static_text.GetLabel()
         drink_type = ""
-
         if current_text == "Please enter how many milliliters of coke you drink:":
             drink_type = "coke"
         elif current_text == "Please enter how many milliliters of water you drink:":
@@ -330,13 +351,11 @@ class MainFrame(wx.Frame):
                 print("日期时间：", date_time)
                 print("用户输入的内容：", input_text)
                 print("饮料类型：", drink_type)
-
                 mysql.insert_drink_data(connection,drink_type,input_text)
-
         except ValueError:
             self.static_text2.SetLabel("Please enter a valid integer value for intake amount!")
-
-
+        data_latest20 = mysql.print_drink_data_latest20(connection)
+        self.static_text8.SetLabel(data_latest20)
 
 
 
@@ -352,11 +371,13 @@ class MainFrame(wx.Frame):
         t = threading.Thread(target=self.countdown, args=(total_seconds,))
         t.start()
 
+
     def reload(self, event):
         self.start_button.Enable()
         self.reload_button.Disable()
         self.timer_running = False
         self.timer_label.SetLabel("00:00")
+
 
     def countdown(self, total_seconds):
         for i in range(total_seconds, -1, -1):
