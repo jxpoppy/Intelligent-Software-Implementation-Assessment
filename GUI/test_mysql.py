@@ -3,7 +3,7 @@ import random
 import time
 connection=connect_to_mysql()
 use_database(connection)
-drink_type=['water','coke','beer','juice']
+drink_type=['water','coke','beer','milk']
 exercise_type=['walk','run','cycle','basketball','football','swim']
 dic=dict()
 
@@ -34,6 +34,20 @@ def insert_exercise_data_test(connection, date_time, exercise_type, duration):
     print("Data inserted successfully.")
 
 
+def insert_sleep_data_test(connection, date_time, duration):  # sleep_time和wake_time是格式为YYYY-mm-dd HH:MM:SS的字符串
+
+    # 向表格 sleep_data 中插入数据
+    with connection.cursor() as cursor:
+        insert_query = """
+        INSERT INTO sleep_data (date_time, duration)
+        VALUES (%s, %s)
+        """
+        data = (date_time, duration)
+        cursor.execute(insert_query, data)
+    connection.commit()
+    print("Data inserted successfully.")
+
+
 # 获取当前的日期和时间
 now = datetime.now()
 # 获取当前的日期（年月日时分秒）
@@ -42,18 +56,18 @@ now = datetime.now()
 for i in range(70):
     date_times=now-timedelta(days=7-int(i/10))
     date_time=date_times.strftime("%Y-%m-%d %H:%M:%S")
-    time.sleep(0.1)
+    #time.sleep(0.1)
     type=random.choice(drink_type)
     intake=int(random.randint(1,20)*50)
     print(i)
     insert_drink_data_test(connection,date_time, type,intake)
-"""
 
+"""
 """
 for i in range(70):
     date_times=now-timedelta(days=7-int(i/10))
     date_time=date_times.strftime("%Y-%m-%d %H:%M:%S")
-    time.sleep(0.1)
+    #time.sleep(0.1)
     type=random.choice(exercise_type)
     hour = random.randint(0, 23)
     minute = random.randint(0, 59)
@@ -67,6 +81,21 @@ for i in range(70):
     insert_exercise_data_test(connection,date_time,type,duration)
 
 """
+"""
+for i in range(30):
+    date_times = now - timedelta(days=30 - i)
+    date_time = date_times.strftime("%Y-%m-%d %H:%M:%S")
+    hour = random.randint(0, 16)
+    minute = random.randint(0, 59)
+    second = random.randint(0, 59)
+    random_time = f"{hour:02}:{minute:02}:{second:02}"
+    duration=random_time
+    print(i)
+    insert_sleep_data_test(connection,date_time,duration)
+"""
+
+
+
 
 #data=fetch_drink_data_latest20(connection)
 #data.reverse()
@@ -77,6 +106,6 @@ for i in range(70):
 #drink_data_histogram(connection)
 #drink_data_pie_chart(connection)
 #exercise_data_histogram(connection)
-exercise_data_pie_chart(connection)
+#exercise_data_pie_chart(connection)
 
 connection.close()
