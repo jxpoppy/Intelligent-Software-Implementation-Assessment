@@ -113,59 +113,59 @@ class MainFrame(wx.Frame):
     def __init__(self,parent,title):
         super(MainFrame,self).__init__(parent,title="VITA",size=(1300,1000))
         self.Centre()
-        bg_panel = BackgroundPanel(self, "1.png")
+        self.main_panel = BackgroundPanel(self, "1.png")
 
-        btn1 = wx.Button(bg_panel, -1, 'Drink water', pos=(110, 200),size=(100, 70))
+        btn1 = wx.Button(self.main_panel, -1, 'Drink water', pos=(110, 200),size=(100, 70))
         btn1.Bind(wx.EVT_BUTTON, lambda event:self.on_open_sub_frame_water('Drink water'))
         btn1.SetBackgroundColour(wx.Colour(255, 255, 255))
 
         image_path1 = "6.png"  # 替换为你的图片路径
-        insert_image(bg_panel, image_path1, size=(90, 70), position=(20, 200))
+        insert_image(self.main_panel, image_path1, size=(90, 70), position=(20, 200))
 
-        btn2 = wx.Button(bg_panel, -1, 'Exercise', pos=(110, 400), size=(100, 70))
+        btn2 = wx.Button(self.main_panel, -1, 'Exercise', pos=(110, 400), size=(100, 70))
         btn2.Bind(wx.EVT_BUTTON, lambda event:self.on_open_sub_frame_sports('Exercise'))
         btn2.SetBackgroundColour(wx.Colour(255, 255, 255))
 
         image_path2 = "7.png"  # 替换为你的图片路径
-        insert_image(bg_panel, image_path2, size=(90, 70), position=(20, 400))
+        insert_image(self.main_panel, image_path2, size=(90, 70), position=(20, 400))
 
-        btn3 = wx.Button(bg_panel, -1, 'Sleep', pos=(110, 600), size=(100, 70))
+        btn3 = wx.Button(self.main_panel, -1, 'Sleep', pos=(110, 600), size=(100, 70))
         btn3.Bind(wx.EVT_BUTTON, lambda event:self.on_open_sub_frame_sleep('Sleep'))
         btn3.SetBackgroundColour(wx.Colour(255, 255, 255))
 
         image_path3 = "8.png"  # 替换为你的图片路径
-        insert_image(bg_panel, image_path3, size=(90, 70), position=(20, 600))
+        insert_image(self.main_panel, image_path3, size=(90, 70), position=(20, 600))
 
-        btn4 = wx.Button(bg_panel, -1, 'personal centre', pos=(110, 800), size=(100, 70))
-        btn4.Bind(wx.EVT_BUTTON, lambda event:self.on_open_sub_frame_personal_centre('personal centre'))
-        btn4.SetBackgroundColour(wx.Colour(255, 255, 255))
+        #btn4 = wx.Button(self.main_panel, -1, 'personal centre', pos=(110, 800), size=(100, 70))
+        #btn4.Bind(wx.EVT_BUTTON, lambda event:self.on_open_sub_frame_personal_centre('personal centre'))
+        #btn4.SetBackgroundColour(wx.Colour(255, 255, 255))
 
-        image_path4 = "9.png"  # 替换为你的图片路径
-        insert_image(bg_panel, image_path4, size=(90, 70), position=(20, 800))
+        #image_path4 = "9.png"  # 替换为你的图片路径
+        #insert_image(self.main_panel, image_path4, size=(90, 70), position=(20, 800))
 
-        btn_exit = wx.Button(bg_panel, -1, 'Exit', pos=(1100, 800), size=(100, 70))
+        btn_exit = wx.Button(self.main_panel, -1, 'Exit', pos=(1100, 800), size=(100, 70))
         btn_exit.Bind(wx.EVT_BUTTON, self.on_exit)
         btn_exit.SetBackgroundColour(wx.Colour(255, 255, 255))
 
         fig = mysql.drink_data_histogram(connection)
-        self.canvas = FC(bg_panel, -1, fig)
+        self.canvas = FC(self.main_panel, -1, fig)
         self.canvas.SetMinSize((500,500))
-        self.canvas.Move(250,200)
+        self.canvas.Move(250,10)
 
         fig2 = mysql.exercise_data_histogram(connection)
-        self.canvas2 = FC(bg_panel, -1, fig2)
+        self.canvas2 = FC(self.main_panel, -1, fig2)
         self.canvas2.SetMinSize((500, 500))
-        self.canvas2.Move(800, 200)
+        self.canvas2.Move(800, 10)
 
-        fig3 = mysql.exercise_data_histogram(connection)
-        self.canvas3 = FC(bg_panel, -1, fig3)
+        fig3 = mysql.drink_data_pie_chart(connection)
+        self.canvas3 = FC(self.main_panel, -1, fig3)
         self.canvas3.SetMinSize((500, 500))
-        self.canvas3.Move(250, 600)
+        self.canvas3.Move(250, 400)
 
-        fig4 = mysql.exercise_data_histogram(connection)
-        self.canvas4 = FC(bg_panel, -1, fig4)
+        fig4 = mysql.exercise_data_pie_chart(connection)
+        self.canvas4 = FC(self.main_panel, -1, fig4)
         self.canvas4.SetMinSize((500, 500))
-        self.canvas4.Move(850, 600)
+        self.canvas4.Move(800, 400)
 
 
 
@@ -177,10 +177,53 @@ class MainFrame(wx.Frame):
 
 
 
-    def on_close(self,event):
-        # 关闭子窗口
-        self.Close()
+    def on_close_water(self,event):
+        fig = mysql.drink_data_histogram(connection)
+        self.canvas = FC(self.main_panel, -1, fig)
+        self.canvas.SetMinSize((500, 500))
+        self.canvas.Move(250, 10)
+        fig2 = mysql.exercise_data_histogram(connection)
+        self.canvas2 = FC(self.main_panel, -1, fig2)
+        self.canvas2.SetMinSize((500, 500))
+        self.canvas2.Move(800, 10)
+        fig3 = mysql.drink_data_pie_chart(connection)
+        self.canvas3 = FC(self.main_panel, -1, fig3)
+        self.canvas3.SetMinSize((500, 500))
+        self.canvas3.Move(250, 400)
+        fig4 = mysql.exercise_data_pie_chart(connection)
+        self.canvas4 = FC(self.main_panel, -1, fig4)
+        self.canvas4.SetMinSize((500, 500))
+        self.canvas4.Move(800, 400)
+        self.sub_frame_water.Close()
         self.Show()
+
+
+
+
+
+
+    def on_close_sport(self,event):
+        fig = mysql.drink_data_histogram(connection)
+        self.canvas = FC(self.main_panel, -1, fig)
+        self.canvas.SetMinSize((500, 500))
+        self.canvas.Move(250, 10)
+        fig2 = mysql.exercise_data_histogram(connection)
+        self.canvas2 = FC(self.main_panel, -1, fig2)
+        self.canvas2.SetMinSize((500, 500))
+        self.canvas2.Move(800, 10)
+        fig3 = mysql.drink_data_pie_chart(connection)
+        self.canvas3 = FC(self.main_panel, -1, fig3)
+        self.canvas3.SetMinSize((500, 500))
+        self.canvas3.Move(250, 400)
+        fig4 = mysql.exercise_data_pie_chart(connection)
+        self.canvas4 = FC(self.main_panel, -1, fig4)
+        self.canvas4.SetMinSize((500, 500))
+        self.canvas4.Move(800, 400)
+        self.sub_frame_sport.Close()
+        self.Show()
+
+
+
 
     def on_exit(self, event):
         self.Close()
@@ -207,75 +250,75 @@ class MainFrame(wx.Frame):
 
 
     def on_open_sub_frame_water(self, title):
-        sub_frame = wx.Frame(self, title=title, size=(1300, 1000))
-        sub_panel = BackgroundPanel(sub_frame, "10.png")
-        sub_sub_panel = BackgroundPanel(sub_panel, "14.png")
+        self.sub_frame_water = wx.Frame(self, title=title, size=(1300, 1000))
+        self.sub_panel_water = BackgroundPanel(self.sub_frame_water, "10.png")
+        sub_sub_panel = BackgroundPanel(self.sub_panel_water, "14.png")
         sub_sub_panel.SetSize((450, 700))  # 宽度200像素，高度100像素
         sub_sub_panel.SetPosition((850, 70))  # x坐标50像素，y坐标50像素
 
 
         font = wx.Font(14, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL)
-        static_text1 = wx.StaticText(sub_panel,
+        static_text1 = wx.StaticText(self.sub_panel_water,
                                      label='Please select the drink you want to record by clicking on the icon below:',
                                      pos=(150, 25))
         static_text1.SetBackgroundColour(wx.Colour(180, 230, 240))
         static_text1.SetFont(font)
 
-        btn_coke = pic_button(sub_panel, "2.png", pos=(200, 65), size=(100, 140))
+        btn_coke = pic_button(self.sub_panel_water, "2.png", pos=(200, 65), size=(100, 140))
         btn_coke.SetBackgroundColour(wx.Colour(180, 230, 240))
         btn_coke.Bind(wx.EVT_BUTTON, self.coke_button_click)
 
         font2 = wx.Font(22, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL)
-        static_text2 = wx.StaticText(sub_panel, label='coke', pos=(170, 225))
+        static_text2 = wx.StaticText(self.sub_panel_water, label='coke', pos=(240, 225))
         static_text2.SetBackgroundColour(wx.Colour(215, 250, 255))
         static_text2.SetFont(font)
 
-        btn_water = pic_button(sub_panel, "3.png", pos=(350, 65), size=(100, 140))
+        btn_water = pic_button(self.sub_panel_water, "3.png", pos=(350, 65), size=(100, 140))
         btn_water.SetBackgroundColour(wx.Colour(180, 230, 240))
         btn_water.Bind(wx.EVT_BUTTON, self.water_button_click)
 
-        static_text3 = wx.StaticText(sub_panel, label='water', pos=(380, 225))
+        static_text3 = wx.StaticText(self.sub_panel_water, label='water', pos=(380, 225))
         static_text3.SetBackgroundColour(wx.Colour(215, 250, 255))
         static_text3.SetFont(font)
 
-        btn_beer = pic_button(sub_panel, "4.png", pos=(500, 65), size=(100, 140))
+        btn_beer = pic_button(self.sub_panel_water, "4.png", pos=(500, 65), size=(100, 140))
         btn_beer.SetBackgroundColour(wx.Colour(180, 230, 240))
         btn_beer.Bind(wx.EVT_BUTTON, self.beer_button_click)
 
-        static_text4 = wx.StaticText(sub_panel, label='Beer', pos=(530, 225))
+        static_text4 = wx.StaticText(self.sub_panel_water, label='Beer', pos=(530, 225))
         static_text4.SetBackgroundColour(wx.Colour(215, 250, 255))
         static_text4.SetFont(font)
 
-        btn_milk = pic_button(sub_panel, "5.png", pos=(650, 65), size=(100, 140))
+        btn_milk = pic_button(self.sub_panel_water, "5.png", pos=(650, 65), size=(100, 140))
         btn_milk.SetBackgroundColour(wx.Colour(180, 230, 240))
         btn_milk.Bind(wx.EVT_BUTTON, self.milk_button_click)
 
-        static_text5 = wx.StaticText(sub_panel, label='Milk', pos=(680, 225))
+        static_text5 = wx.StaticText(self.sub_panel_water, label='Milk', pos=(680, 225))
         static_text5.SetBackgroundColour(wx.Colour(215, 250, 255))
         static_text5.SetFont(font)
 
-        self.static_text = wx.StaticText(sub_panel, label="Please select the drink you want to record!", pos=(200, 300))
+        self.static_text = wx.StaticText(self.sub_panel_water, label="Please select the drink you want to record!", pos=(200, 300))
         self.static_text.SetFont(font)
         self.static_text.SetBackgroundColour(wx.Colour(215, 250, 255))
 
-        self.static_text2 = wx.StaticText(sub_panel, label=" ", pos=(200, 450))
+        self.static_text2 = wx.StaticText(self.sub_panel_water, label=" ", pos=(200, 450))
         self.static_text2.SetFont(font)
         self.static_text2.SetBackgroundColour(wx.Colour(255, 255, 255))
 
         # 创建输入框并禁用
-        self.input_box = wx.TextCtrl(sub_panel, pos=(300, 375), style=wx.TE_PROCESS_ENTER | wx.TE_LEFT)
+        self.input_box = wx.TextCtrl(self.sub_panel_water, pos=(300, 375), style=wx.TE_PROCESS_ENTER | wx.TE_LEFT)
         self.input_box.Disable()
 
-        self.btn_submit = wx.Button(sub_panel, label='Record', pos=(500, 350),size=(100, 70))
+        self.btn_submit = wx.Button(self.sub_panel_water, label='Record', pos=(500, 350),size=(100, 70))
         self.btn_submit.Disable()
         self.btn_submit.Bind(wx.EVT_BUTTON, self.record_click)
         self.btn_submit.SetBackgroundColour(wx.Colour(255, 255, 255))
 
-        static_text6 = wx.StaticText(sub_panel, label='History', pos=(1000, 25))
+        static_text6 = wx.StaticText(self.sub_panel_water, label='History', pos=(1000, 25))
         static_text6.SetBackgroundColour(wx.Colour(180, 230, 240))
         static_text6.SetFont(font2)
 
-        self.static_text8 = wx.StaticText(sub_panel, label="There are no records now!", pos=(900, 70))
+        self.static_text8 = wx.StaticText(self.sub_panel_water, label="There are no records now!", pos=(900, 120))
         self.static_text8.SetFont(font)
 
         data_latest20 = mysql.print_drink_data_latest20(connection)
@@ -284,39 +327,39 @@ class MainFrame(wx.Frame):
 
 
 
-        static_text7 = wx.StaticText(sub_panel, label='Water reminder', pos=(360, 500))
+        static_text7 = wx.StaticText(self.sub_panel_water, label='Water reminder', pos=(360, 500))
         static_text7.SetBackgroundColour(wx.Colour(255, 255, 255))
         static_text7.SetFont(font2)
 
         font3 = wx.Font(32, wx.DEFAULT, wx.NORMAL, wx.NORMAL)
-        self.static_text3 = wx.StaticText(sub_panel, label="HOUR", pos=(320, 550))
+        self.static_text3 = wx.StaticText(self.sub_panel_water, label="HOUR", pos=(320, 550))
         self.static_text3.SetFont(font)
         self.static_text3.SetBackgroundColour(wx.Colour(255, 255, 255))
-        self.static_text4 = wx.StaticText(sub_panel, label="MINUTE", pos=(520, 550))
+        self.static_text4 = wx.StaticText(self.sub_panel_water, label="MINUTE", pos=(520, 550))
         self.static_text4.SetFont(font)
         self.static_text4.SetBackgroundColour(wx.Colour(255, 255, 255))
-        self.timer_label = wx.StaticText(sub_panel, label="00:00", pos=(400, 700))
+        self.timer_label = wx.StaticText(self.sub_panel_water, label="00:00", pos=(400, 700))
         self.timer_label.SetFont(font3)
-        self.start_button = wx.Button(sub_panel, label="Start", pos=(300, 800),size=(100, 70))
+        self.start_button = wx.Button(self.sub_panel_water, label="Start", pos=(300, 800),size=(100, 70))
         self.start_button.Bind(wx.EVT_BUTTON, self.start_countdown)
         self.start_button.SetBackgroundColour(wx.Colour(255, 255, 255))
-        self.reload_button = wx.Button(sub_panel, label="Reset", pos=(500, 800),size=(100, 70))
+        self.reload_button = wx.Button(self.sub_panel_water, label="Reset", pos=(500, 800),size=(100, 70))
         self.reload_button.Bind(wx.EVT_BUTTON, self.reload)
         self.reload_button.SetBackgroundColour(wx.Colour(255, 255, 255))
-        self.hour_choice = wx.Choice(sub_panel, choices=[str(i) for i in range(24)], pos=(300, 600),size=(100, 70))
+        self.hour_choice = wx.Choice(self.sub_panel_water, choices=[str(i) for i in range(24)], pos=(300, 600),size=(100, 70))
         self.hour_choice.SetBackgroundColour(wx.Colour(255, 255, 255))
-        self.minute_choice = wx.Choice(sub_panel, choices=[str(i) for i in range(60)], pos=(500, 600),size=(100, 70))
+        self.minute_choice = wx.Choice(self.sub_panel_water, choices=[str(i) for i in range(60)], pos=(500, 600),size=(100, 70))
         self.minute_choice.SetBackgroundColour(wx.Colour(255, 255, 255))
         self.timer_running = False
 
-        btn_close = wx.Button(sub_panel, wx.ID_ANY, 'Back', pos=(950, 800), size=(100, 70))
-        btn_close.Bind(wx.EVT_BUTTON, lambda event: (sub_frame.Close(), self.Show()))
+        btn_close = wx.Button(self.sub_panel_water, wx.ID_ANY, 'Back', pos=(950, 800), size=(100, 70))
+        btn_close.Bind(wx.EVT_BUTTON, self.on_close_water)
         btn_close.SetBackgroundColour(wx.Colour(255, 255, 255))
-        btn_exit = wx.Button(sub_panel, -1, 'Exit', pos=(1100, 800), size=(100, 70))
+        btn_exit = wx.Button(self.sub_panel_water, -1, 'Exit', pos=(1100, 800), size=(100, 70))
         btn_exit.Bind(wx.EVT_BUTTON, self.on_exit)
         btn_exit.SetBackgroundColour(wx.Colour(255, 255, 255))
-        sub_frame.Centre()
-        sub_frame.Show()
+        self.sub_frame_water.Centre()
+        self.sub_frame_water.Show()
 
     def coke_button_click(self, event):
         # 在点击按钮后更新静态文本
@@ -343,7 +386,7 @@ class MainFrame(wx.Frame):
         self.btn_submit.Enable()
 
     def record_click(self, event):
-        now = datetime.datetime.now()
+        now = datetime.now()
         date_time = now.strftime("%Y-%m-%d %H:%M:%S")
         input_text = self.input_box.GetValue()
         current_text = self.static_text.GetLabel()
@@ -430,7 +473,7 @@ class MainFrame(wx.Frame):
 
 
     def finish_timer3(self, event2):
-        now = datetime.datetime.now()
+        now = datetime.now()
         date_time = now.strftime("%Y-%m-%d %H:%M:%S")
         if self.timer_running2:
             self.stop_timer2(event2)
@@ -439,7 +482,12 @@ class MainFrame(wx.Frame):
         else:
             self.static_text4.SetLabel("Record successfully! Click start to record more!")
             print("日期时间：", date_time)
+            print("type",type(date_time))
             print("睡眠时长：", self.format_time2(self.elapsed_time2))
+            print("type",type(self.format_time2(self.elapsed_time2)))
+
+        mysql.insert_sleep_data(connection,self.format_time2(self.elapsed_time2))
+
         self.elapsed_time2 = 0
         self.start_time2 = 0
         self.last_stop_time2 = 0
@@ -455,44 +503,60 @@ class MainFrame(wx.Frame):
         sub_frame = wx.Frame(self, title=title, size=(1300, 1000))
         sub_panel = BackgroundPanel(sub_frame, "11.png")
         font2 = wx.Font(16, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL)
-        static_text8 = wx.StaticText(sub_panel, label='Sports reminder', pos=(330, 300))
+        static_text8 = wx.StaticText(sub_panel, label='Sleep reminder', pos=(370, 430))
         static_text8.SetBackgroundColour(wx.Colour(230, 250, 230))
         static_text8.SetFont(font2)
-
+        self.static_text3 = wx.StaticText(sub_panel, label="HOUR", pos=(320, 470))
+        self.static_text3.SetFont(font2)
+        self.static_text3.SetBackgroundColour(wx.Colour(255, 255, 255))
+        self.static_text4 = wx.StaticText(sub_panel, label="MINUTE", pos=(520, 470))
+        self.static_text4.SetFont(font2)
         font3 = wx.Font(32, wx.DEFAULT, wx.NORMAL, wx.NORMAL)
-        self.timer_label = wx.StaticText(sub_panel, label="00:00", pos=(400, 500))
+        self.timer_label = wx.StaticText(sub_panel, label="00:00", pos=(400, 600))
         self.timer_label.SetFont(font3)
-        self.start_button = wx.Button(sub_panel, label="Start", pos=(300, 600), size=(100, 70))
+        self.start_button = wx.Button(sub_panel, label="Start", pos=(300, 700), size=(100, 70))
         self.start_button.Bind(wx.EVT_BUTTON, self.start_countdown)
         self.start_button.SetBackgroundColour(wx.Colour(255, 255, 255))
-        self.reload_button = wx.Button(sub_panel, label="Reset", pos=(500, 600), size=(100, 70))
+        self.reload_button = wx.Button(sub_panel, label="Reset", pos=(500, 700), size=(100, 70))
         self.reload_button.Bind(wx.EVT_BUTTON, self.reload)
         self.reload_button.SetBackgroundColour(wx.Colour(255, 255, 255))
-        self.hour_choice = wx.Choice(sub_panel, choices=[str(i) for i in range(24)], pos=(300, 400), size=(100, 70))
+        self.hour_choice = wx.Choice(sub_panel, choices=[str(i) for i in range(24)], pos=(300, 500), size=(100, 70))
         self.hour_choice.SetBackgroundColour(wx.Colour(255, 255, 255))
-        self.minute_choice = wx.Choice(sub_panel, choices=[str(i) for i in range(60)], pos=(500, 400), size=(100, 70))
+        self.minute_choice = wx.Choice(sub_panel, choices=[str(i) for i in range(60)], pos=(500, 500), size=(100, 70))
         self.minute_choice.SetBackgroundColour(wx.Colour(255, 255, 255))
         self.timer_running = False
 
 
+
+
+
+
+
+
         self.static_text4 = wx.StaticText(sub_panel, label="You can time you sleep now!",
-                                          pos=(650, 300))
+                                          pos=(700, 450))
         self.static_text4.SetFont(font2)
         self.static_text4.SetBackgroundColour(wx.Colour(230, 250, 230))
-        self.timer_label2 = wx.StaticText(sub_panel, label="00:00:00", pos=(750, 500))
+        self.timer_label2 = wx.StaticText(sub_panel, label="00:00:00", pos=(750, 600))
         self.timer_label2.SetFont(font3)
-        self.start_button2 = wx.Button(sub_panel, label="Start", pos=(700, 400), size=(100, 70))
+        self.start_button2 = wx.Button(sub_panel, label="Start", pos=(700, 500), size=(100, 70))
         self.start_button2.SetBackgroundColour(wx.Colour(255, 255, 255))
-        self.stop_button2 = wx.Button(sub_panel, label="Stop", pos=(900, 400), size=(100, 70))
+        self.stop_button2 = wx.Button(sub_panel, label="Stop", pos=(900, 500), size=(100, 70))
         self.stop_button2.SetBackgroundColour(wx.Colour(255, 255, 255))
-        self.continue_button2 = wx.Button(sub_panel, label="Continue", pos=(700, 600), size=(100, 70))
+        self.continue_button2 = wx.Button(sub_panel, label="Continue", pos=(700, 700), size=(100, 70))
         self.continue_button2.SetBackgroundColour(wx.Colour(255, 255, 255))
-        self.finish_button2 = wx.Button(sub_panel, label="Finish", pos=(900, 600), size=(100, 70))
+        self.finish_button2 = wx.Button(sub_panel, label="Finish", pos=(900, 700), size=(100, 70))
         self.finish_button2.SetBackgroundColour(wx.Colour(255, 255, 255))
         self.start_button2.Bind(wx.EVT_BUTTON, self.start_timer3)
         self.stop_button2.Bind(wx.EVT_BUTTON, self.stop_timer2)
         self.continue_button2.Bind(wx.EVT_BUTTON, self.continue_timer2)
         self.finish_button2.Bind(wx.EVT_BUTTON, self.finish_timer3)
+
+        fig5 = mysql.sleep_data_line_chart(connection)
+        self.canvas5 = FC(sub_panel, -1, fig5)
+        self.canvas5.SetMinSize((500, 500))
+        self.canvas5.Move(150, 20)
+
 
         self.timer_running2 = False
         self.elapsed_time2 = 0
@@ -543,7 +607,7 @@ class MainFrame(wx.Frame):
 
 
     def finish_timer2(self, event2):
-        now = datetime.datetime.now()
+        now = datetime.now()
         date_time = now.strftime("%Y-%m-%d %H:%M:%S")
 
         if self.timer_running2:
@@ -574,6 +638,8 @@ class MainFrame(wx.Frame):
             print("运动类型：", sport_type)
 
         mysql.insert_exercise_data(connection,sport_type,self.format_time2(self.elapsed_time2))
+        cal = mysql.calculate_exercise_calorie_today(connection)
+        self.static_text11.SetLabel(str(cal)+"cal")
 
         self.elapsed_time2 = 0
         self.start_time2 = 0
@@ -650,8 +716,8 @@ class MainFrame(wx.Frame):
 
 
     def on_open_sub_frame_sports(self, title):
-        sub_frame = wx.Frame(self, title=title, size=(1300, 1000))
-        sub_panel = BackgroundPanel(sub_frame, "12.png")
+        self.sub_frame_sport = wx.Frame(self, title=title, size=(1300, 1000))
+        sub_panel = BackgroundPanel(self.sub_frame_sport, "12.png")
 
         font = wx.Font(14, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL)
         static_text1 = wx.StaticText(sub_panel,
@@ -710,10 +776,16 @@ class MainFrame(wx.Frame):
         static_text7.SetBackgroundColour(wx.Colour(250, 250, 180))
         static_text7.SetFont(font)
 
-        static_text8 = wx.StaticText(sub_panel, label='Sports reminder', pos=(160, 300))
+        static_text8 = wx.StaticText(sub_panel, label='Sports reminder', pos=(140, 300))
         static_text8.SetBackgroundColour(wx.Colour(250, 250, 180))
         static_text8.SetFont(font2)
 
+        self.static_text3 = wx.StaticText(sub_panel, label="HOUR", pos=(120, 350))
+        self.static_text3.SetFont(font)
+        self.static_text3.SetBackgroundColour(wx.Colour(255, 255, 255))
+        self.static_text4 = wx.StaticText(sub_panel, label="MINUTE", pos=(320, 350))
+        self.static_text4.SetFont(font)
+        self.static_text4.SetBackgroundColour(wx.Colour(255, 255, 255))
         font3 = wx.Font(32, wx.DEFAULT, wx.NORMAL, wx.NORMAL)
         self.timer_label = wx.StaticText(sub_panel, label="00:00", pos=(200, 500))
         self.timer_label.SetFont(font3)
@@ -765,22 +837,23 @@ class MainFrame(wx.Frame):
         static_text9.SetBackgroundColour(wx.Colour(250, 250, 180))
         static_text9.SetFont(font2)
 
-
-
-
-
-
+        self.static_text11 = wx.StaticText(sub_panel, label="",
+                                          pos=(1000, 500))
+        self.static_text11.SetFont(font3)
+        self.static_text11.SetBackgroundColour(wx.Colour(255, 255, 255))
+        cal = mysql.calculate_exercise_calorie_today(connection)
+        self.static_text11.SetLabel(str(cal) + "cal")
 
 
 
         btn_close = wx.Button(sub_panel, wx.ID_ANY, 'Back', pos=(950, 800), size=(100, 70))
-        btn_close.Bind(wx.EVT_BUTTON, lambda event: (sub_frame.Close(), self.Show()))
+        btn_close.Bind(wx.EVT_BUTTON, self.on_close_sport)
         btn_close.SetBackgroundColour(wx.Colour(255, 255, 255))
         btn_exit = wx.Button(sub_panel, -1, 'Exit', pos=(1100, 800), size=(100, 70))
         btn_exit.Bind(wx.EVT_BUTTON, self.on_exit)
         btn_exit.SetBackgroundColour(wx.Colour(255, 255, 255))
-        sub_frame.Centre()
-        sub_frame.Show()
+        self.sub_frame_sport.Centre()
+        self.sub_frame_sport.Show()
 
 
 
