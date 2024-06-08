@@ -246,6 +246,28 @@ def fetch_exercise_data_week(connection):
         data_week = cursor.fetchall()
     return data_week
 
+def fetch_exercise_data_today(connection):
+    # 读取数据
+    with connection.cursor() as cursor:
+        # 获取当前时间和今天凌晨0时的时间
+        now = datetime.now()
+        today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+
+        # 转换为字符串格式，适应MySQL的DATETIME格式
+        today_start_str = today_start.strftime('%Y-%m-%d %H:%M:%S')
+
+        # 查询 exercise_data 表格中 date_time 为今天0时起到现在的数据
+        query = """
+            SELECT * FROM exercise_data
+            WHERE date_time >= %s
+            ORDER BY id DESC
+            """
+        cursor.execute(query, (today_start_str,))
+
+        # 将数据存储在变量 data_today 中
+        data_today = cursor.fetchall()
+    return data_today
+
 def fetch_sleep_data(connection):
     # 读取数据
     with connection.cursor() as cursor:
@@ -313,6 +335,43 @@ def truncate_sleep_data(connection):
         cursor.execute(truncate_table_query)
     # 提交更改
     connection.commit()
+
+def calculate_exercise_calorie_today(connection):
+    #获取今日运动数据
+    data_today=fetch_exercise_data_today(connection)
+    # 今日无数据时返回0
+    if len(data_today)==0:
+        return 0
+    #存储卡路里
+    calorie=0
+    for row in data_today:
+        duration = row['duration']
+        # 获取总秒数
+        total_seconds = duration.total_seconds()
+        # 将秒数转换为分钟数
+        duration_min = total_seconds / 60
+        print(row['exercise_type'],duration_min)
+        if row['exercise_type']=='walk':
+            # 累计卡路里数量
+            calorie += 5 * duration_min
+        elif row['exercise_type']=='run':
+            # 累计卡路里数量
+            calorie += 12 * duration_min
+        elif row['exercise_type']=='cycle':
+            # 累计卡路里数量
+            calorie += 10 * duration_min
+        elif row['exercise_type']=='basketball':
+            # 累计卡路里数量
+            calorie += 8 * duration_min
+        elif row['exercise_type']=='football':
+            # 累计卡路里数量
+            calorie += 8 * duration_min
+        elif row['exercise_type']=='swim':
+            # 累计卡路里数量
+            calorie += 10 * duration_min
+    #确保输出为整数
+    calorie = int(calorie)
+    return calorie
 
 def drink_data_histogram(connection):
     # 创建一个字典，用于存储每天每种饮品的摄入量总和
